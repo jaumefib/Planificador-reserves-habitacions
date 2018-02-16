@@ -1,0 +1,40 @@
+This directory contains the C implementation of Metric-FF, as it was
+used in the 3rd international planning competition. Build the planner
+by typing
+
+make
+
+Which produces an executable named
+
+ff
+
+Usage should be self-explanatory. Running ff without any parameters
+prints out a brief help information about the parameters that are
+applicable, which basically come down to specifying the domain and
+problem files.
+
+Have fun,
+
+Joerg Hoffmann
+
+How FF works
+http://www.cs.upc.edu/%7Ejvazquez/teaching/iag/laboratorio/run_ff.html
+
+Homepage FF
+http://fai.cs.uni-saarland.de/hoffmann/ff.html
+
+Sweeden university
+http://www.ida.liu.se/%7ETDDC17/info/labs/planning/writing.shtml
+
+Planing domains
+http://users.cecs.anu.edu.au/%7Epatrik/pddlman/writing.html
+
+Metric FF
+http://fai.cs.uni-saarland.de/hoffmann/metric-ff.html
+
+
+
+Practica 3
+
+Assignar reserves a habitacions
+Quan hem d'optimitzar necessitem el metric i el fluents
