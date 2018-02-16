@@ -17,85 +17,84 @@
 (:predicates
   (atessa ?x - reserva)
   (ocupada ?x - habitacio ?y - dia)
+  (noAmbCapacitatsIguals ?x - reserva) ; no hi han habitacions amb igual capacitat
 )
 
 
-(:action assignarDifCapacitat3
+
+(:action assignarIgualCapacitat
   :parameters (?r - reserva ?hab - habitacio)
-  :precondition (and  (not(atessa ?r))
-
-                      (>= (habitacio-capacitat ?hab) (reserva-capacitat ?r))
-                      (= (- (habitacio-capacitat ?hab) (reserva-capacitat ?r)) 3 )
-                      (forall (?d - dia)
-                              (or (not(and (<= (reserva-diaInici ?r) (valor-dia ?d))
-                                           (>= (reserva-diaFi    ?r) (valor-dia ?d))))
-                                  (not(ocupada ?hab ?d)))))
-  :effect (and  (atessa ?r)
-                (decrease (reserves-ateses) 2)
-                (forall (?d - dia)
-                        (when (and (<= (reserva-diaInici ?r) (valor-dia ?d))   ; diaInici >= ?d
-                                   (>= (reserva-diaFi    ?r) (valor-dia ?d)))  ; diaFi    <= ?d
-                              (ocupada ?hab ?d))))
-)
-
-
-(:action assignarDifCapacitat2
-  :parameters (?r - reserva ?hab - habitacio)
-  :precondition (and  (not(atessa ?r))
-
-                      (>= (habitacio-capacitat ?hab) (reserva-capacitat ?r))
-                      (= (- (habitacio-capacitat ?hab) (reserva-capacitat ?r)) 2 )
-                      (forall (?d - dia)
-                              (or (not(and (<= (reserva-diaInici ?r) (valor-dia ?d))
-                                           (>= (reserva-diaFi    ?r) (valor-dia ?d))))
-                                  (not(ocupada ?hab ?d)))))
-  :effect (and  (atessa ?r)
-                (decrease (reserves-ateses) 3)
-                (forall (?d - dia)
-                        (when (and (<= (reserva-diaInici ?r) (valor-dia ?d))   ; diaInici >= ?d
-                                   (>= (reserva-diaFi    ?r) (valor-dia ?d)))  ; diaFi    <= ?d
-                              (ocupada ?hab ?d))))
-)
-
-
-(:action assignarDifCapacitat1
-  :parameters (?r - reserva ?hab - habitacio)
-  :precondition (and  (not(atessa ?r))
-
-                      (>= (habitacio-capacitat ?hab) (reserva-capacitat ?r))
-                      (= (- (habitacio-capacitat ?hab) (reserva-capacitat ?r)) 1 )
-                      (forall (?d - dia)
-                              (or (not(and (<= (reserva-diaInici ?r) (valor-dia ?d))
-                                           (>= (reserva-diaFi    ?r) (valor-dia ?d))))
-                                  (not(ocupada ?hab ?d)))))
-  :effect (and  (atessa ?r)
-                (decrease (reserves-ateses) 4)
-                (forall (?d - dia)
-                        (when (and (<= (reserva-diaInici ?r) (valor-dia ?d))   ; diaInici >= ?d
-                                   (>= (reserva-diaFi    ?r) (valor-dia ?d)))  ; diaFi    <= ?d
-                              (ocupada ?hab ?d))))
-)
-
-
-(:action assignarAmbCapacitat
-  :parameters (?r - reserva ?hab - habitacio)
-  :precondition (and  (not(atessa ?r))
+  :precondition (and  (not (atessa ?r))
                       (= (habitacio-capacitat ?hab) (reserva-capacitat ?r))
                       (forall (?d - dia)
-                              (or (not(and (<= (reserva-diaInici ?r) (valor-dia ?d))
-                                           (>= (reserva-diaFi    ?r) (valor-dia ?d))))
-                                  (not(ocupada ?hab ?d)))))
+                              (or (not (and (<= (reserva-diaInici ?r) (valor-dia ?d))
+                                           (>= (reserva-diaFi    ?r) (valor-dia ?d))
+                                       )
+                                  ) (not (ocupada ?hab ?d))
+                              )
+                      )
+                )
   :effect (and  (atessa ?r)
-                (decrease (reserves-ateses) 5)
+                (increase (reserves-ateses) 5)
+                (forall (?d - dia)
+                        (when (and (<= (reserva-diaInici ?r) (valor-dia ?d))   
+                                   (>= (reserva-diaFi    ?r) (valor-dia ?d)))
+                              (ocupada ?hab ?d)
+                        )
+                )
+          )
+)
+
+
+(:action compararCapacitats
+  :parameters (?r - reserva)
+  :precondition (and (not (atessa ?r)) (not (noAmbCapacitatsIguals ?r))
+                     (forall (?h - habitacio ?d - dia)
+                             (and (<= (reserva-diaInici ?r) (valor-dia ?d))
+                                  (>= (reserva-diaFi    ?r) (valor-dia ?d))
+                                  (not (ocupada ?h ?d))
+                                  (not (= (habitacio-capacitat ?h) (reserva-capacitat ?r)))
+                             )
+                     )
+                )
+  :effect (and (noAmbCapacitatsIguals ?r))
+)
+
+
+(:action assignarDifCapacitat
+  :parameters (?r - reserva ?h - habitacio)
+  :precondition (and (not (atessa ?r)) (noAmbCapacitatsIguals ?r) (> (habitacio-capacitat ?h) (reserva-capacitat ?r))
+                     (forall (?d - dia)
+                             (or (not (and (<= (reserva-diaInici ?r) (valor-dia ?d))
+                                           (>= (reserva-diaFi    ?r) (valor-dia ?d))
+                                      )
+                                  ) (not (ocupada ?h ?d))
+                             )
+                     )
+                     (forall (?rx - reserva)
+                             (or (atessa ?rx)
+                                 (not (and (< (reserva-capacitat ?r) (reserva-capacitat ?rx))
+                                           (<= (reserva-capacitat ?rx) (habitacio-capacitat ?h))
+                                      )
+                                 )
+                             )
+                     )
+                )
+  :effect (and  (atessa ?r)
+                (increase (reserves-ateses) 5)
                 (forall (?d - dia)
                         (when (and (<= (reserva-diaInici ?r) (valor-dia ?d))   ; diaInici >= ?d
                                    (>= (reserva-diaFi    ?r) (valor-dia ?d)))  ; diaFi    <= ?d
-                              (ocupada ?hab ?d))))
+                              (ocupada ?h ?d)
+                        )
+                )
+          )
 )
+
 
 (:action ignorar
   :parameters (?r - reserva)
   :precondition (not(atessa ?r))
-  :effect (and (atessa ?r) (decrease (reserves-ateses) 1))
+  :effect (and (atessa ?r) (increase (reserves-ateses) 1))
 )
 )
